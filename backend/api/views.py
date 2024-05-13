@@ -154,7 +154,7 @@ class RecipeViewSet(ModelViewSet):
                     {
                         'errors':
                         f'Повторно - \"{recipe.name}\" добавить нельзя,'
-                        },
+                    },
                     status=status.HTTP_400_BAD_REQUEST
                 )
             Favorite.objects.create(user=user, recipe=recipe)

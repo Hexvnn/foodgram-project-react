@@ -27,7 +27,7 @@ class UserSerializer(UserCreateSerializer):
             'username',
             'email',
             'is_subscribed'
-            )
+        )
 
     def get_is_subscribed(self, obj):
         user = self.context.get('request').user
@@ -122,7 +122,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             return False
         return ShoppingCart.objects.filter(
             user=request.user, recipe=obj
-            ).exists()
+        ).exists()
 
 
 class CreateIngredientsInRecipeSerializer(serializers.ModelSerializer):
@@ -176,25 +176,25 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
             if ingredient_id in list_ingredient:
                 raise serializers.ValidationError(
                     'Ингредиенты должны быть уникальными!'
-                    )
+                )
             list_ingredient.append(ingredient_id)
             try:
                 Ingredient.objects.get(pk=ingredient_id)
             except Ingredient.DoesNotExist:
                 raise serializers.ValidationError(
                     f'Ингредиент с id={ingredient_id} не существует!'
-                    )
+                )
         if not data:
             raise serializers.ValidationError(
                 'Список ингредиентов не может быть пустым!'
-                )
+            )
         return data
 
     def validate_tags(self, data):
         if len(data) != len(set(data)):
             raise serializers.ValidationError(
                 'Теги должны быть уникальными!'
-                )
+            )
 
         if not data:
             raise serializers.ValidationError(
@@ -235,13 +235,13 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 '''Запрос на обновление рецепта должен содержать поле
                 `ingredients`!'''
-                )
+            )
 
         if tags_data is None:
             raise serializers.ValidationError(
                 '''Запрос на обновление рецепта должен содержать поле
                 `tags`!'''
-                )
+            )
 
         IngredientInRecipe.objects.filter(recipe=instance).delete()
 

@@ -13,7 +13,7 @@ DEBUG = (os.getenv('DEBUG', 'False')) == 'True'
 
 ALLOWED_HOSTS = [
     '130.193.55.7', '127.0.0.1', 'localhost', 'foodgramproject.hopto.org'
-    ]
+]
 
 CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS").split()
 
@@ -84,15 +84,15 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME':
         'django.contrib.auth.password_validation.MinimumLengthValidator'
-        },
+    },
     {
         'NAME':
         'django.contrib.auth.password_validation.CommonPasswordValidator'
-        },
+    },
     {
         'NAME':
         'django.contrib.auth.password_validation.NumericPasswordValidator'
-        },
+    },
 ]
 
 LANGUAGE_CODE = 'ru-RU'

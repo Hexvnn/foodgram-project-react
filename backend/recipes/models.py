@@ -21,12 +21,12 @@ class Tag(models.Model):
                     regex='^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$',
                     message=(
                         'Введенное значение не является цветом в формате HEX!'
-                        )
+                    )
                 )
         ],
         default='#006400',
         help_text='Введите цвет тега. Например, #006400'
-        )
+    )
     slug = models.SlugField(
         'Уникальный слаг',
         max_length=200,
@@ -53,7 +53,7 @@ class Ingredient(models.Model):
         'Название ингредиента',
         max_length=200,
         db_index=True
-        )
+    )
     measurement_unit = models.CharField(
         'Единица измерения',
         max_length=200
