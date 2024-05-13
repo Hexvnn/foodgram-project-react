@@ -1,9 +1,10 @@
 from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
-from rest_framework import viewsets, status
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import (
@@ -150,7 +151,10 @@ class RecipeViewSet(ModelViewSet):
             recipe = get_object_or_404(Recipe, id=pk)
             if Favorite.objects.filter(user=user, recipe=recipe).exists():
                 return Response(
-                    {'errors': f'Повторно - \"{recipe.name}\" добавить нельзя,'},
+                    {
+                        'errors':
+                        f'Повторно - \"{recipe.name}\" добавить нельзя,'
+                        },
                     status=status.HTTP_400_BAD_REQUEST
                 )
             Favorite.objects.create(user=user, recipe=recipe)

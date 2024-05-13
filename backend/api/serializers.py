@@ -1,15 +1,19 @@
 import base64
 
 from django.core.files.base import ContentFile
-from users.models import User
+
 from rest_framework import serializers
-from djoser.serializers import UserCreateSerializer
 from rest_framework.serializers import ModelSerializer
-from recipes.models import Subscribe
+
+from djoser.serializers import UserCreateSerializer
+
 from recipes.models import (
     Tag, Ingredient, Recipe, IngredientInRecipe,
     Subscribe, Favorite, ShoppingCart,
 )
+
+from users.models import User
+
 
 class UserSerializer(UserCreateSerializer):
     is_subscribed = serializers.SerializerMethodField()
@@ -56,7 +60,7 @@ class Base64ImageField(serializers.ImageField):
             data = ContentFile(base64.b64decode(imgstr), name='photo.' + ext)
 
         return super().to_internal_value(data)
-    
+
 
 class TagSerializer(ModelSerializer):
 
@@ -67,12 +71,12 @@ class TagSerializer(ModelSerializer):
 
 
 class IngredientSerializer(ModelSerializer):
-    '''Сериализатор для вывода ингредиентов.'''
 
     class Meta:
 
         model = Ingredient
         fields = ('id', 'name', 'measurement_unit')
+
 
 class IngredientInRecipeSerializer(serializers.ModelSerializer):
 
@@ -82,7 +86,6 @@ class IngredientInRecipeSerializer(serializers.ModelSerializer):
         source='ingredient.measurement_unit')
 
     class Meta:
-        """Мета-параметры сериализатора"""
 
         model = IngredientInRecipe
         fields = ('id', 'name', 'measurement_unit', 'amount')
@@ -117,7 +120,9 @@ class RecipeSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         if request is None or request.user.is_anonymous:
             return False
-        return ShoppingCart.objects.filter(user=request.user, recipe=obj).exists()
+        return ShoppingCart.objects.filter(
+            user=request.user, recipe=obj
+            ).exists()
 
 
 class CreateIngredientsInRecipeSerializer(serializers.ModelSerializer):
@@ -169,19 +174,27 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         for ingredient in data:
             ingredient_id = ingredient.get('id')
             if ingredient_id in list_ingredient:
-                raise serializers.ValidationError('Ингредиенты должны быть уникальными!')
+                raise serializers.ValidationError(
+                    'Ингредиенты должны быть уникальными!'
+                    )
             list_ingredient.append(ingredient_id)
             try:
                 Ingredient.objects.get(pk=ingredient_id)
             except Ingredient.DoesNotExist:
-                raise serializers.ValidationError(f'Ингредиент с id={ingredient_id} не существует!')
+                raise serializers.ValidationError(
+                    f'Ингредиент с id={ingredient_id} не существует!'
+                    )
         if not data:
-            raise serializers.ValidationError('Список ингредиентов не может быть пустым!')
+            raise serializers.ValidationError(
+                'Список ингредиентов не может быть пустым!'
+                )
         return data
-        
+
     def validate_tags(self, data):
         if len(data) != len(set(data)):
-            raise serializers.ValidationError('Теги должны быть уникальными!')
+            raise serializers.ValidationError(
+                'Теги должны быть уникальными!'
+                )
 
         if not data:
             raise serializers.ValidationError(
@@ -219,13 +232,19 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         tags_data = validated_data.pop('tags', None)
 
         if ingredients_data is None:
-            raise serializers.ValidationError('Запрос на обновление рецепта должен содержать поле `ingredients`!')
-        
+            raise serializers.ValidationError(
+                '''Запрос на обновление рецепта должен содержать поле
+                `ingredients`!'''
+                )
+
         if tags_data is None:
-            raise serializers.ValidationError('Запрос на обновление рецепта должен содержать поле `tags`!')
-        
+            raise serializers.ValidationError(
+                '''Запрос на обновление рецепта должен содержать поле
+                `tags`!'''
+                )
+
         IngredientInRecipe.objects.filter(recipe=instance).delete()
-        
+
         for ingredient_data in ingredients_data:
             ingredient_id = ingredient_data.get('id')
             amount = ingredient_data.get('amount')

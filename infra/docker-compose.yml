@@ -6,6 +6,7 @@ volumes:
   media_volume:
   data_volume:
 
+
 services:
   db:
     image: postgres:13.10
@@ -14,16 +15,18 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data
 
+
   backend:
     image: bogdanovsemen/foodgram_backend:latest
+    env_file:
+      - ./.env
     volumes:
       - data_volume:/app/data/
       - static_volume:/app/static/
       - media_volume:/app/media/
     depends_on:
       - db
-    env_file:
-      - ./.env
+
 
   frontend:
     image: bogdanovsemen/foodgram_frontend:latest
@@ -41,5 +44,5 @@ services:
       - static_volume:/var/html/static/
       - media_volume:/var/html/media/
     depends_on:
-      - backend
       - frontend
+      - backend

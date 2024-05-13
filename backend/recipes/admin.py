@@ -61,5 +61,5 @@ class FavoriteAdmin(ModelAdmin):
 
 
 @register(TagInRecipe)
-class TagAdmin(ModelAdmin):
+class TagInRecipeAdmin(ModelAdmin):
     list_display = ('pk', 'tag', 'recipe')

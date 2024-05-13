@@ -1,15 +1,21 @@
-from pathlib import Path
 import os
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = (
-    'django-insecure-ycw(pbfd$lkw6n8s-ie6s)iqle65*bk%++6m9k8@xkulu6xku!'
-    )
+SECRET_KEY = os.getenv('SECRET_KEY', 'default_key')
 
-DEBUG = True
+DEBUG = (os.getenv('DEBUG', 'False')) == 'True'
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    '130.193.55.7', '127.0.0.1', 'localhost', 'foodgramproject.hopto.org'
+    ]
+
+CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS").split()
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -72,16 +78,20 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'
-     },
+        'NAME':
+        'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'
+    },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'
+        'NAME':
+        'django.contrib.auth.password_validation.MinimumLengthValidator'
         },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'
+        'NAME':
+        'django.contrib.auth.password_validation.CommonPasswordValidator'
         },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'
+        'NAME':
+        'django.contrib.auth.password_validation.NumericPasswordValidator'
         },
 ]
 
