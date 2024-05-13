@@ -10,12 +10,12 @@ class User(AbstractUser):
         unique=True,
         db_index=True,
         validators=[UnicodeUsernameValidator()],
-        )
+    )
     email = models.EmailField(
         'Адрес электронной почты',
         max_length=254,
         unique=True,
-        )
+    )
     first_name = models.CharField(
         'Имя',
         max_length=150,

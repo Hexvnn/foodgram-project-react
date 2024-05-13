@@ -17,12 +17,12 @@ class Tag(models.Model):
         max_length=7,
         unique=True,
         validators=[
-                RegexValidator(
-                    regex='^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$',
-                    message=(
-                        'Введенное значение не является цветом в формате HEX!'
-                    )
+            RegexValidator(
+                regex='^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$',
+                message=(
+                    'Введенное значение не является цветом в формате HEX!'
                 )
+            )
         ],
         default='#006400',
         help_text='Введите цвет тега. Например, #006400'
