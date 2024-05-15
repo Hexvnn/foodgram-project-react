@@ -16,12 +16,11 @@ class Command(BaseCommand):
                 f'{CSV_FILES_DIR}/tags.csv', encoding='utf-8'
         ) as file:
             csv_reader = csv.reader(file, delimiter=',', quotechar='"')
+            new_tags = []
             for row in csv_reader:
-                name = row[0]
-                color = row[1]
-                slug = row[2]
-                Tag.objects.create(
-                    name=name, color=color, slug=slug
-                )
-        print('Теги в базу данных загружены')
-        print('ADD', Tag.objects.count(), 'tags')
+                name, color, slug = row[0], row[1], row[2]
+                if not Tag.objects.filter(name=name, color=color, slug=slug).exists():
+                    new_tags.append(Tag(name=name, color=color, slug=slug))
+            Tag.objects.bulk_create(new_tags)
+            self.stdout.write(self.style.SUCCESS('Теги в базу данных загружены'))
+            self.stdout.write(self.style.SUCCESS(f'Добавлено {len(new_tags)} тегов'))

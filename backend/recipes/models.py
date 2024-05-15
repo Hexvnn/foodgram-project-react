@@ -4,17 +4,19 @@ from django.db import models
 
 User = get_user_model()
 
+MAX_LENGTH = 200
+MAX_LENGTH_FOR_COLOR = 7
 
 class Tag(models.Model):
 
     name = models.CharField(
         'Название тэга',
-        max_length=200,
+        max_length=MAX_LENGTH,
         unique=True,
     )
     color = models.CharField(
         'Цвет в HEX',
-        max_length=7,
+        max_length=MAX_LENGTH_FOR_COLOR,
         unique=True,
         validators=[
             RegexValidator(
@@ -51,12 +53,12 @@ class Ingredient(models.Model):
 
     name = models.CharField(
         'Название ингредиента',
-        max_length=200,
+        max_length=MAX_LENGTH,
         db_index=True
     )
     measurement_unit = models.CharField(
         'Единица измерения',
-        max_length=200
+        max_length=MAX_LENGTH
     )
 
     class Meta:
@@ -78,7 +80,7 @@ class Recipe(models.Model):
     )
     name = models.CharField(
         verbose_name='Название рецепта',
-        max_length=200,
+        max_length=MAX_LENGTH,
     )
     image = models.ImageField(
         verbose_name='Картинка, закодированная в Base64',

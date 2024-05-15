@@ -1,8 +1,7 @@
 import base64
 
 from django.core.files.base import ContentFile
-
-from rest_framework import serializers
+from rest_framework import serializers, status
 from rest_framework.serializers import ModelSerializer
 
 from djoser.serializers import UserCreateSerializer
@@ -129,11 +128,12 @@ class CreateIngredientsInRecipeSerializer(serializers.ModelSerializer):
 
     id = serializers.IntegerField()
     amount = serializers.IntegerField()
+    MIN_AMOUNT = 1
 
     @staticmethod
     def validate_amount(value):
 
-        if value < 1:
+        if value < CreateIngredientsInRecipeSerializer.MIN_AMOUNT:
             raise serializers.ValidationError(
                 'Количество ингредиентов должно быть больше 0!'
             )
@@ -204,13 +204,25 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
 
     def create_ingredients(self, ingredients, recipe):
 
+        ingredient_ids = [element['id'] for element in ingredients]
+        existing_ingredients = Ingredient.objects.filter(pk__in=ingredient_ids)
+        ingredient_map = {ingredient.id: ingredient for ingredient in existing_ingredients}
+
+        ingredients_to_create = []
         for element in ingredients:
-            id = element['id']
-            ingredient = Ingredient.objects.get(pk=id)
+            ingredient_id = element['id']
             amount = element['amount']
-            IngredientInRecipe.objects.create(
-                ingredient=ingredient, recipe=recipe, amount=amount
-            )
+            if ingredient_id in ingredient_map:
+                ingredient = ingredient_map[ingredient_id]
+                ingredients_to_create.append(
+                    IngredientInRecipe(
+                        ingredient=ingredient,
+                        recipe=recipe,
+                        amount=amount
+                    )
+                )
+        
+        IngredientInRecipe.objects.bulk_create(ingredients_to_create)
 
     def create_tags(self, tags, recipe):
 
@@ -279,6 +291,25 @@ class FollowSerializer(UserSerializer):
         fields = ('email', 'id', 'username', 'first_name', 'last_name',
                   'is_subscribed', 'recipes', 'recipes_count',)
 
+
+    def validate(self, data):
+        author = data['author']
+        user = self.context.get('request').user
+        change_subscription_status = Subscribe.objects.filter( 
+            user=user.id, author=author.id 
+        )
+        if change_subscription_status.exists():
+            raise serializers.ValidationError(
+                f'Вы уже подписаны на {author}!',
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        if user == author:
+            raise serializers.ValidationError(
+                'Вы пытаетесь подписаться на самого себя!',
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        return data
+
     def get_recipes(self, obj):
 
         request = self.context.get('request')
@@ -290,7 +321,6 @@ class FollowSerializer(UserSerializer):
 
     @staticmethod
     def get_recipes_count(obj):
-
         return obj.recipes.count()
 
 

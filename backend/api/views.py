@@ -83,32 +83,28 @@ class CustomUserViewSet(UserViewSet):
         url_name='subscribe',
     )
     def subscribe(self, request, id):
-
-        user = request.user
+        user = request.user 
         author = get_object_or_404(User, id=id)
-        change_subscription_status = Subscribe.objects.filter(
-            user=user.id, author=author.id
-        )
+
         if request.method == 'POST':
-            if user == author:
-                return Response('Вы пытаетесь подписаться на себя!!',
-                                status=status.HTTP_400_BAD_REQUEST)
-            if change_subscription_status.exists():
-                return Response(f'Вы уже подписаны на {author}',
-                                status=status.HTTP_400_BAD_REQUEST)
-            subscribe = Subscribe.objects.create(
-                user=user,
-                author=author
+            subscribe = Subscribe.objects.create( 
+                user=user, 
+                author=author 
             )
             subscribe.save()
             serializer = FollowSerializer(author, context={'request': request})
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        if change_subscription_status.exists():
-            change_subscription_status.delete()
-            return Response(f'Вы отписались от {author}',
-                            status=status.HTTP_204_NO_CONTENT)
-        return Response(f'Вы не подписаны на {author}',
+        
+        if request.method == 'DELETE':
+            subscription = Subscribe.objects.filter( 
+            user=user.id, author=author.id
+            )
+            subscription.delete()
+            return Response(f'Вы отписались от {author}', 
+                            status=status.HTTP_204_NO_CONTENT) 
+        return Response(f'Вы не подписаны на {author}', 
                         status=status.HTTP_400_BAD_REQUEST)
+        
 
 
 class RecipeViewSet(ModelViewSet):

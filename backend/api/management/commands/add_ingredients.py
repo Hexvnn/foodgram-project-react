@@ -17,13 +17,9 @@ class Command(BaseCommand):
         ) as file:
             reader = csv.reader(file)
             next(reader)
-            ingredients = [
-                Ingredient(
-                    name=row[0],
-                    measurement_unit=row[1],
-                )
-                for row in reader
-            ]
-            Ingredient.objects.bulk_create(ingredients)
-        print('Ингредиенты в базу данных загружены')
-        print('ADD', Ingredient.objects.count(), 'Ingredient')
+            for row in reader:
+                name, measurement_unit = row[0], row[1]
+                if not Ingredient.objects.filter(name=name, measurement_unit=measurement_unit).exists():
+                    Ingredient.objects.create(name=name, measurement_unit=measurement_unit)
+            self.stdout.write(self.style.SUCCESS('Ингредиенты в базу данных загружены'))
+            self.stdout.write(self.style.SUCCESS(f'Добавлено {Ingredient.objects.count()} ингредиентов'))
