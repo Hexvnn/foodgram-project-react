@@ -1,9 +1,8 @@
 import base64
-
 from django.core.files.base import ContentFile
 from rest_framework import serializers, status
 from rest_framework.serializers import ModelSerializer
-
+from rest_framework.exceptions import ValidationError
 from djoser.serializers import UserCreateSerializer
 
 from recipes.models import (
@@ -31,7 +30,7 @@ class UserSerializer(UserCreateSerializer):
     def get_is_subscribed(self, obj):
         user = self.context.get('request').user
         if user.is_authenticated:
-            return Subscribe.objects.filter(user=user, author=obj.id).exists()
+            return Subscribe.objects.filter(user=user, author=obj).exists()
         return False
 
 
@@ -206,7 +205,9 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
 
         ingredient_ids = [element['id'] for element in ingredients]
         existing_ingredients = Ingredient.objects.filter(pk__in=ingredient_ids)
-        ingredient_map = {ingredient.id: ingredient for ingredient in existing_ingredients}
+        ingredient_map = {
+            ingredient.id: ingredient for ingredient in existing_ingredients
+        }
 
         ingredients_to_create = []
         for element in ingredients:
@@ -221,7 +222,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
                         amount=amount
                     )
                 )
-        
+
         IngredientInRecipe.objects.bulk_create(ingredients_to_create)
 
     def create_tags(self, tags, recipe):
@@ -291,25 +292,6 @@ class FollowSerializer(UserSerializer):
         fields = ('email', 'id', 'username', 'first_name', 'last_name',
                   'is_subscribed', 'recipes', 'recipes_count',)
 
-
-    def validate(self, data):
-        author = data['author']
-        user = self.context.get('request').user
-        change_subscription_status = Subscribe.objects.filter( 
-            user=user.id, author=author.id 
-        )
-        if change_subscription_status.exists():
-            raise serializers.ValidationError(
-                f'Вы уже подписаны на {author}!',
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        if user == author:
-            raise serializers.ValidationError(
-                'Вы пытаетесь подписаться на самого себя!',
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        return data
-
     def get_recipes(self, obj):
 
         request = self.context.get('request')
@@ -331,3 +313,29 @@ class AddFavoritesSerializer(serializers.ModelSerializer):
 
         model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')
+
+
+class SubscribeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subscribe
+        fields = ('author', 'user')
+
+    def validate(self, data):
+        author = self.instance
+        user = self.context.get('request').user
+        if Subscribe.objects.filter(author=author, user=user).exists():
+            raise ValidationError(detail=f'Вы уже подписаны на {author}',
+                                  code=status.HTTP_400_BAD_REQUEST)
+        if user == data['author']:
+            raise ValidationError(
+                detail='Вы пытаетесь подписаться на самого себя!',
+                code=status.HTTP_400_BAD_REQUEST
+            )
+        return data
+
+    def to_representation(self, instance):
+        request = self.context.get('request')
+        return FollowSerializer(
+            instance.author,
+            context={'request': request}
+        ).data

@@ -19,8 +19,14 @@ class Command(BaseCommand):
             new_tags = []
             for row in csv_reader:
                 name, color, slug = row[0], row[1], row[2]
-                if not Tag.objects.filter(name=name, color=color, slug=slug).exists():
+                if not Tag.objects.filter(
+                    name=name, color=color, slug=slug
+                ).exists():
                     new_tags.append(Tag(name=name, color=color, slug=slug))
             Tag.objects.bulk_create(new_tags)
-            self.stdout.write(self.style.SUCCESS('Теги в базу данных загружены'))
-            self.stdout.write(self.style.SUCCESS(f'Добавлено {len(new_tags)} тегов'))
+            self.stdout.write(
+                self.style.SUCCESS('Теги в базу данных загружены')
+            )
+            self.stdout.write(
+                self.style.SUCCESS(f'Добавлено {len(new_tags)} тегов')
+            )

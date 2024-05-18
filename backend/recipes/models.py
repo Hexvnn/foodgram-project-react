@@ -7,6 +7,7 @@ User = get_user_model()
 MAX_LENGTH = 200
 MAX_LENGTH_FOR_COLOR = 7
 
+
 class Tag(models.Model):
 
     name = models.CharField(

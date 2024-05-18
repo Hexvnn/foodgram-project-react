@@ -5,6 +5,7 @@ from django.db import models
 MAX_LENGTH = 150
 MAX_LENGTH_FOR_EMAIL = 254
 
+
 class User(AbstractUser):
     username = models.CharField(
         'Уникальный юзернейм',
