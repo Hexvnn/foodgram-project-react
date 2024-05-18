@@ -122,7 +122,7 @@ class RecipeViewSet(ModelViewSet):
             'author').prefetch_related('tags', 'ingredient_list')
         user = (
             self.request.user if self.request.user.is_authenticated else None
-            )
+        )
         if user:
             queryset = queryset.annotate(
                 is_favorite=Exists(
